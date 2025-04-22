@@ -1,8 +1,8 @@
 from .http_client import HttpClient
 import requests
 
-class RequestsHttpClient(HttpClient):
 
+class RequestsHttpClient(HttpClient):
     def __init__(self):
         pass
 

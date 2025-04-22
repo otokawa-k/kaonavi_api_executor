@@ -5,10 +5,6 @@ from ..http_client.requests_http_client import RequestsHttpClient
 
 
 class ApiAccessTokenFetcher:
-    """
-    Fetches the access token for the Kaonavi API.
-    """
-
     def __init__(self, client: HttpClient):
         self.client = client or RequestsHttpClient()
         self.consumer_key = os.getenv('KAONAVI_CONSUMER_KEY')

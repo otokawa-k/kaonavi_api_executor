@@ -19,6 +19,3 @@ class MockHttpClient:
 
     def post(self, url, data, headers=None, auth=None):
         return self._mock_response
-
-    def get(self, url, params=None, headers=None, auth=None):
-        raise NotImplementedError("GET not supported in mock")
