@@ -22,13 +22,11 @@ class ApiAccessTokenFetcher:
                 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
             auth=HTTPBasicAuth(self.consumer_key, self.consumer_secret)
         )
-        # responseをjson形式で取得
         if response.status_code != 200:
             raise Exception(
                 f"Failed to fetch access token: {response.status_code} {response.text}")
-        # responseをjson形式で取得
+
         response_json = response.json()
-        # access_tokenを取得
         access_token = response_json.get('access_token')
         if not access_token:
             raise Exception("Access token not found in response.")
