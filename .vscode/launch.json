@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Debug",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "src.kaonavi_api_executor.main",
+            "envFile": "${workspaceFolder}/.env",
+            "justMyCode": false,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Debug Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "-m", "not online",
+                "tests"
+            ],
+            "envFile": "${workspaceFolder}/.env.test",
+            "justMyCode": false,
+            "console": "integratedTerminal"
+        }
+    ]
+}
