@@ -6,19 +6,10 @@ from requests import Response
 
 class HttpClient(ABC):
     @abstractmethod
-    def post(
+    def send(
         self,
         url: str,
-        data: Any,
-        headers: Optional[Dict[str, str]] = None,
-        auth: Optional[AuthBase] = None,
-    ) -> Response:
-        pass
-
-    @abstractmethod
-    def get(
-        self,
-        url: str,
+        data: Optional[Any] = None,
         params: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
         auth: Optional[AuthBase] = None,
