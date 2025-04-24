@@ -4,7 +4,6 @@
 カオナビのAPIを簡単に実行するためのPythonライブラリです。
 
 ## 主な機能
-- アクセストークンの取得
 - メンバー情報の取得
 
 ## モジュール構成
@@ -19,35 +18,22 @@
 
 1. パッケージのビルド
 ```bash
-# pipを使用する場合
-pip install build
-python -m build
-
-# uvを使用する場合
 uv pip install build
-python -m build
+uv build
 ```
 
 2. ビルドされたパッケージのインストール
 ```bash
-# pipを使用する場合
-pip install dist/*.whl
-
-# uvを使用する場合
-uv pip install dist/*.whl
+uv pip install dist/kaonavi_api_executor-<version>-py3-none-any.whl
 ```
 
 ### GitHubリリースからインストールする場合
 
-1. [GitHubリリースページ](https://github.com/[username]/kaonavi-api-executor/releases)から最新の.whlファイルをダウンロード
+1. GitHubリリースページから最新の.whlファイルをダウンロード
 
 2. ダウンロードしたパッケージのインストール
 ```bash
-# pipを使用する場合
-pip install kaonavi_api_executor-0.1.0-py3-none-any.whl
-
-# uvを使用する場合
-uv pip install kaonavi_api_executor-0.1.0-py3-none-any.whl
+uv pip install kaonavi_api_executor-<version>-py3-none-any.whl
 ```
 
 ## 使用例
@@ -63,8 +49,8 @@ fetcher = ApiAccessTokenFetcher(Post())
 token = fetcher.fetch_access_token()
 
 # メンバー情報の取得
-api_model = GetMemberApi(token=token)
-api_executor = ApiExecutor(api_model)
+member_api = GetMemberApi(token=token)
+api_executor = ApiExecutor(member_api)
 response = api_executor.execute()
 ```
 
@@ -82,14 +68,13 @@ cd kaonavi_api_executor
 irm https://astral.sh/uv/install.ps1 | iex
 # または (Ubuntu)
 curl -sSfL https://astral.sh/uv/install.sh | sh
-
-# 開発用依存関係のインストール
-uv pip install -e ".[dev]"
 ```
 
 3. テスト実行
 ```bash
-pytest
+uv run pytest
+# APIを実行せずにテストする場合
+uv run pytest -m "not online"
 ```
 
 ## License
