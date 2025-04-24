@@ -15,7 +15,6 @@
 ## インストール方法
 
 ### ソースからビルドする場合
-
 1. パッケージのビルド
 ```bash
 uv pip install build
@@ -28,7 +27,6 @@ uv pip install dist/kaonavi_api_executor-<version>-py3-none-any.whl
 ```
 
 ### GitHubリリースからインストールする場合
-
 1. GitHubリリースページから最新の.whlファイルをダウンロード
 
 2. ダウンロードしたパッケージのインストール
@@ -37,6 +35,12 @@ uv pip install kaonavi_api_executor-<version>-py3-none-any.whl
 ```
 
 ## 使用例
+実行前に、以下の環境変数を事前に設定してください：
+
+| 変数名                  | 説明                              |
+|-------------------------|----------------------------------|
+| KAONAVI_CONSUMER_KEY    | カオナビ公開APIv2のConsumer Key    |
+| KAONAVI_CONSUMER_SECRET | カオナビ公開APIv2のConsumer Secret |
 
 ```python
 from kaonavi_api_executor.auth.api_access_token_fetcher import ApiAccessTokenFetcher
@@ -55,7 +59,6 @@ response = api_executor.execute()
 ```
 
 ## 開発者向け
-
 1. リポジトリのクローン
 ```bash
 git clone <repository-url>
@@ -78,5 +81,4 @@ uv run pytest -m "not online"
 ```
 
 ## License
-
 This project is licensed under the [MIT License](./LICENSE).
