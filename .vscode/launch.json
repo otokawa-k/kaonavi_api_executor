@@ -6,8 +6,8 @@
             "type": "debugpy",
             "request": "launch",
             "module": "src.kaonavi_api_executor.main",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
             "envFile": "${workspaceFolder}/.env",
-            "justMyCode": false,
             "console": "integratedTerminal"
         },
         {
@@ -19,9 +19,9 @@
                 "-m", "not online",
                 "tests"
             ],
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
             "envFile": "${workspaceFolder}/.env.test",
-            "justMyCode": false,
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
         }
     ]
 }
