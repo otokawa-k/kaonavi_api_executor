@@ -1,39 +1,55 @@
+import pytest
 from kaonavi_api_executor.http_client.http_methods import Post, Get
-from unittest.mock import patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 
-def test_post():
-    post_client = Post()
+@pytest.mark.asyncio
+async def test_post():
+    mock_session = AsyncMock()
+    mock_response = AsyncMock()
+    mock_session.post.return_value.__aenter__.return_value = mock_response
 
-    with patch("kaonavi_api_executor.http_client.http_methods.requests.post") as mock_post:
-        mock_response = MagicMock()
-        mock_post.return_value = mock_response
+    async with Post(session=mock_session) as client:
+        response = await client.send(
+            url="https://example.com",
+            data={"key": "value"},
+            headers={"Content-Type": "application/json"},
+            auth=None,
+        )
 
-        url = "https://example.com"
-        data = {"key": "value"}
-        headers = {"Content-Type": "application/json"}
-        auth = MagicMock()
+    mock_session.post.assert_called_once_with(
+        "https://example.com",
+        data={"key": "value"},
+        params=None,
+        headers={"Content-Type": "application/json"},
+        auth=None,
+    )
+    assert response == mock_response
 
-        response = post_client.send(url=url, data=data, headers=headers, auth=auth)
 
-        mock_post.assert_called_once_with(
-            url, data=data, headers=headers, auth=auth)
-        assert response == mock_response
+@pytest.mark.asyncio
+async def test_get():
+    mock_session = AsyncMock()
+    mock_response = AsyncMock()
+    mock_session.get.return_value.__aenter__.return_value = mock_response
 
-def test_get():
-    get_client = Get()
-
-    with patch("kaonavi_api_executor.http_client.http_methods.requests.get") as mock_get:
-        mock_response = MagicMock()
-        mock_get.return_value = mock_response
-
+    async with Get(session=mock_session) as get_client:
         url = "https://example.com"
         params = {"query": "value"}
         headers = {"Content-Type": "application/json"}
         auth = MagicMock()
 
-        response = get_client.send(url=url, params=params, headers=headers, auth=auth)
+        response = await get_client.send(
+            url=url,
+            params=params,
+            headers=headers,
+            auth=auth,
+        )
 
-        mock_get.assert_called_once_with(
-            url, params=params, headers=headers, auth=auth)
-        assert response == mock_response
+    mock_session.get.assert_called_once_with(
+        url,
+        params=params,
+        headers=headers,
+        auth=auth,
+    )
+    assert response == mock_response
