@@ -10,10 +10,10 @@ description = "Kaonavi API Executor"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
+    "httpx>=0.28.1",
     "pydantic>=2.11.3",
     "pytest-asyncio>=0.26.0",
     "python-dotenv>=1.1.0",
-    "requests>=2.32.3",
 ]
 
 [project.optional-dependencies]
@@ -24,6 +24,7 @@ dev = [
 
 [dependency-groups]
 dev = [
+    "mypy>=1.15.0",
     "pytest>=8.3.5",
     "pytest-pythonpath>=0.7.3",
 ]
@@ -34,3 +35,9 @@ testpaths = ["tests"]
 markers = [
     "online: 実APIを使用するテスト",
 ]
+
+[tool.mypy]
+strict = true
+show_error_codes = true
+pretty = true
+warn_unused_configs = true

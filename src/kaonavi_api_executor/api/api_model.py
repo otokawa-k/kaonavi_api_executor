@@ -1,16 +1,18 @@
 from abc import ABC, abstractmethod
-from typing import Generic, Optional
+from typing import Dict, Generic, Optional, Any
+
+from httpx import Auth
 from ..types.typevars import TResponse
 from ..http_client.http_client import HttpClient
 
 
 class ApiModel(ABC, Generic[TResponse]):
-    def __init__(self, token: Optional[str] = None):
+    def __init__(self, token: str):
         self.url: Optional[str] = None
-        self.params: Optional[dict] = None
-        self.data: Optional[dict] = None
-        self.headers: Optional[dict] = None
-        self.auth: Optional[any] = None
+        self.data: Optional[Any] = None
+        self.params: Optional[Dict[str, Any]] = None
+        self.headers: Optional[Dict[str, str]] = None
+        self.auth: Optional[Auth] = None
         self.token = token
 
     @property
@@ -19,5 +21,5 @@ class ApiModel(ABC, Generic[TResponse]):
         pass
 
     @abstractmethod
-    def parse_response(self, raw_json: dict) -> TResponse:
+    def parse_response(self, raw_json: Dict[str, Any]) -> TResponse:
         pass
