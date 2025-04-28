@@ -37,15 +37,15 @@ uv pip install kaonavi_api_executor-<version>-py3-none-any.whl
 ## 使用例
 実行前に、以下の環境変数を事前に設定してください：
 
-| 変数名                  | 説明                              |
-|-------------------------|----------------------------------|
+| 変数名                  | 説明                               |
+| ----------------------- | ---------------------------------- |
 | KAONAVI_CONSUMER_KEY    | カオナビ公開APIv2のConsumer Key    |
 | KAONAVI_CONSUMER_SECRET | カオナビ公開APIv2のConsumer Secret |
 
 ```python
 from kaonavi_api_executor.auth.api_access_token_fetcher import ApiAccessTokenFetcher
 from kaonavi_api_executor.api_executor import ApiExecutor
-from kaonavi_api_executor.api.get_member_api import GetMemberApi
+from kaonavi_api_executor.api.get_members_api import GetMembersApi
 from kaonavi_api_executor.http_client.http_methods import Post
 
 # アクセストークンの取得
@@ -53,8 +53,8 @@ fetcher = ApiAccessTokenFetcher(Post())
 token = fetcher.fetch_access_token()
 
 # メンバー情報の取得
-member_api = GetMemberApi(token=token)
-api_executor = ApiExecutor(member_api)
+api = GetMembersApi(token=token)
+api_executor = ApiExecutor(api)
 response = api_executor.execute()
 ```
 

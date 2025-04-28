@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 from pydantic import BaseModel
 from kaonavi_api_executor.api.api_model import ApiModel
 from kaonavi_api_executor.http_client.http_client import HttpClient
@@ -11,14 +11,10 @@ class MockApiResponse(BaseModel):
 
 
 class MockApiModel(ApiModel[MockApiResponse]):
-    def __init__(self, token: str):
-        if token is None:
-            raise ValueError("Token must be provided")
-
-        super().__init__(token)
+    def __init__(self) -> None:
         self.url = "https://example.com"
         self.params = None
-        self.headers = {"Authorization": f"Bearer {token}"}
+        self.headers = {"Authorization": "mocked-token"}
         self.auth = None
         self.data = None
 
