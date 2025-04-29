@@ -4,7 +4,8 @@
 カオナビのAPIを簡単に実行するためのPythonライブラリです。
 
 ## 主な機能
-- メンバー情報の取得
+- メンバー一覧の取得
+- シート情報の取得
 
 ## モジュール構成
 - `auth/`: 認証関連
@@ -48,14 +49,15 @@ from kaonavi_api_executor.api_executor import ApiExecutor
 from kaonavi_api_executor.api.get_members_api import GetMembersApi
 from kaonavi_api_executor.http_client.http_methods import Post
 
-# アクセストークンの取得
-fetcher = ApiAccessTokenFetcher(Post())
-token = fetcher.fetch_access_token()
+async def main() -> None:
+    # アクセストークンの取得
+    fetcher = ApiAccessTokenFetcher(Post())
+    token = await fetcher.fetch_access_token()
 
-# メンバー情報の取得
-api = GetMembersApi(token=token)
-api_executor = ApiExecutor(api)
-response = api_executor.execute()
+    # メンバー情報の取得
+    api = GetMembersApi(token=token)
+    api_executor = ApiExecutor(api)
+    response = await api_executor.execute()
 ```
 
 ## 開発者向け
