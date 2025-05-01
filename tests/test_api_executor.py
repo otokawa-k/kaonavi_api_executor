@@ -35,6 +35,7 @@ async def test_get_members_api() -> None:
     assert isinstance(result.member_data, list), "member_data should be a list"
 
 
+@pytest.mark.online
 @pytest.mark.asyncio
 async def test_get_sheets_api() -> None:
     sheet_id = os.getenv("SHEET_ID")
