@@ -16,11 +16,23 @@
             "request": "launch",
             "module": "pytest",
             "args": [
-                "tests/unit",
+                "${input:targetTests}",
             ],
             "python": "${workspaceFolder}/.venv/Scripts/python.exe",
             "envFile": "${workspaceFolder}/.env.test",
             "console": "integratedTerminal",
+        }
+    ],
+    "inputs": [
+        {
+            "id": "targetTests",
+            "type": "pickString",
+            "description": "Select test target",
+            "options": [
+                "tests/unit",
+                "tests/integration"
+            ],
+            "default": "tests/unit"
         }
     ]
 }
