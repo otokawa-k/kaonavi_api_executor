@@ -1,10 +1,10 @@
 import pandas as pd
-from typing import Any, Dict
+from kaonavi_api_executor.api.get_sheets_api import SheetsResponse
 
 
 class SheetsMemberDataFlattener:
-    def __init__(self, data: Dict[str, Any]):
-        self.data = data
+    def __init__(self, data: SheetsResponse):
+        self.member_data = data.member_data or []
 
     def flatten(self) -> pd.DataFrame:
         rows = [
@@ -15,7 +15,7 @@ class SheetsMemberDataFlattener:
                     for field in record.get("custom_fields", [])
                 },
             }
-            for member in self.data.get("member_data", [])
+            for member in self.member_data
             for record in member.get("records", [])
         ]
         return pd.DataFrame(rows)
