@@ -16,8 +16,7 @@
             "request": "launch",
             "module": "pytest",
             "args": [
-                "-m", "not online",
-                "tests"
+                "tests/unit",
             ],
             "python": "${workspaceFolder}/.venv/Scripts/python.exe",
             "envFile": "${workspaceFolder}/.env.test",

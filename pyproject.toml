@@ -35,9 +35,6 @@ dev = [
 pythonpath = ["src"]
 testpaths = ["tests"]
 asyncio_default_fixture_loop_scope = "function"
-markers = [
-    "online: 実APIを使用するテスト",
-]
 
 [tool.mypy]
 strict = true
