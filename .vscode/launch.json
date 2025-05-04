@@ -6,7 +6,6 @@
             "type": "debugpy",
             "request": "launch",
             "module": "src.kaonavi_api_executor.main",
-            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
             "envFile": "${workspaceFolder}/.env",
             "console": "integratedTerminal"
         },
@@ -18,7 +17,6 @@
             "args": [
                 "${input:targetTests}",
             ],
-            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
             "envFile": "${workspaceFolder}/.env.test",
             "console": "integratedTerminal",
         }
