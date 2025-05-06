@@ -51,7 +51,7 @@ test_cases: List[tuple[List[Dict[str, Any]], List[Dict[str, Any]]]] = [
                             {
                                 "id": 1001,
                                 "name": "電話番号",
-                                "values": ["078-1234-5678"],
+                                "values": ["078-1234-5678", "090-1234-5678"],
                             },
                             {
                                 "id": 1002,
@@ -67,7 +67,7 @@ test_cases: List[tuple[List[Dict[str, Any]], List[Dict[str, Any]]]] = [
             {
                 "code": "A0001",
                 "住所": "東京都渋谷区1-1-1",
-                "電話番号": "03-1234-5678",
+                "電話番号": ["03-1234-5678"],
                 "FAX番号": None,
             },
             {
@@ -79,7 +79,7 @@ test_cases: List[tuple[List[Dict[str, Any]], List[Dict[str, Any]]]] = [
             {
                 "code": "A0002",
                 "住所": "神戸市中央区3-3-3",
-                "電話番号": "078-1234-5678",
+                "電話番号": ["078-1234-5678", "090-1234-5678"],
                 "FAX番号": "078-9876-5432",
             },
         ],
@@ -88,7 +88,7 @@ test_cases: List[tuple[List[Dict[str, Any]], List[Dict[str, Any]]]] = [
 
 
 @pytest.mark.parametrize("member_data, expected_rows", test_cases)
-def test_flatten_returns_dataframe(
+def test_sheets_member_data_flattener(
     member_data: List[Dict[str, Any]], expected_rows: List[Dict[str, Any]]
 ) -> None:
     input_data = SheetsResponse(
