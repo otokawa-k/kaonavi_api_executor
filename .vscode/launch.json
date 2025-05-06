@@ -16,6 +16,7 @@
             "module": "pytest",
             "args": [
                 "${input:targetTests}",
+                "-vv",
             ],
             "envFile": "${workspaceFolder}/.env.test",
             "console": "integratedTerminal",
