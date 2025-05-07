@@ -66,18 +66,21 @@ test_cases: List[tuple[List[Dict[str, Any]], List[Dict[str, Any]]]] = [
         [
             {
                 "code": "A0001",
+                "row_index": 0,
                 "住所": "東京都渋谷区1-1-1",
                 "電話番号": ["03-1234-5678"],
                 "FAX番号": None,
             },
             {
                 "code": "A0001",
+                "row_index": 1,
                 "住所": "大阪府大阪市2-2-2",
                 "電話番号": None,
                 "FAX番号": None,
             },
             {
                 "code": "A0002",
+                "row_index": 0,
                 "住所": "神戸市中央区3-3-3",
                 "電話番号": ["078-1234-5678", "090-1234-5678"],
                 "FAX番号": "078-9876-5432",
@@ -100,5 +103,5 @@ def test_sheets_member_data_flattener(
     )
     flattener = SheetsMemberDataFlattener(input_data)
     df = flattener.flatten()
-    actual = df.fillna(value=pd.NA).to_dict(orient="records")
+    actual = df.to_dict(orient="records")
     assert actual == expected_rows

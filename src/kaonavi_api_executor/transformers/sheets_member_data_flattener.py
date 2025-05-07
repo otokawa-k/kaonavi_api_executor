@@ -20,6 +20,7 @@ class SheetsMemberDataFlattener:
         rows = [
             {
                 "code": member["code"],
+                "row_index": i,
                 # custom_fieldsを展開（name: values）
                 **{
                     field["name"]: extract_values(field["name"], field["values"])
@@ -27,7 +28,7 @@ class SheetsMemberDataFlattener:
                 },
             }
             for member in self.member_data
-            for record in member.get("records", [])
+            for i, record in enumerate(member.get("records", []))
         ]
 
         df = pd.DataFrame(rows)
@@ -37,4 +38,4 @@ class SheetsMemberDataFlattener:
                 df[col] = df[col].apply(
                     lambda v: v if isinstance(v, list) or pd.isna(v) else [v]
                 )
-        return df
+        return df.fillna(value=pd.NA)

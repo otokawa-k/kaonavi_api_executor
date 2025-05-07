@@ -136,5 +136,5 @@ def test_members_member_data_flattener(
     )
     flattener = MembersMemberDataFlattener(input_data)
     df = flattener.flatten()
-    actual = df.fillna(value=pd.NA).to_dict(orient="records")
+    actual = df.to_dict(orient="records")
     assert actual == expected_rows

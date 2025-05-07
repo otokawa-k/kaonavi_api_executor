@@ -58,4 +58,4 @@ class MembersMemberDataFlattener:
                 df[col] = df[col].apply(
                     lambda v: v if isinstance(v, list) or pd.isna(v) else [v]
                 )
-        return df
+        return df.fillna(value=pd.NA)
