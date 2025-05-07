@@ -3,6 +3,9 @@ from kaonavi_api_executor.auth.api_access_token_fetcher import ApiAccessTokenFet
 from kaonavi_api_executor.api_executor import ApiExecutor
 from kaonavi_api_executor.api.get_members_api import GetMembersApi
 from kaonavi_api_executor.http_client.http_methods import Post
+from kaonavi_api_executor.transformers.members_member_data_flattener import (
+    MembersMemberDataFlattener,
+)
 
 
 @pytest.mark.asyncio
@@ -18,3 +21,8 @@ async def test_get_members_api() -> None:
     assert result.updated_at is not None, "updated_at should not be None"
     assert result.member_data is not None, "member_data should not be None"
     assert isinstance(result.member_data, list), "member_data should be a list"
+
+    flattener = MembersMemberDataFlattener(result)
+    df = flattener.flatten()
+    assert df is not None, "DataFrame should not be None"
+    assert not df.empty, "DataFrame should not be empty"
