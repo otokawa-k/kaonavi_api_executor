@@ -5,12 +5,12 @@
 カオナビAPIv2のアクセストークンを取得し、APIモデルに基づいてAPIを実行します。
 
 ## 主な機能
-- カオナビAPIv2のアクセストークンを取得: [ApiAccessTokenFetcher](.\src\kaonavi_api_executor\auth\api_access_token_fetcher.py)
-- カオナビAPIv2をAPIモデルに基づいて実行: [ApiExecutor](.\src\kaonavi_api_executor\api_executor.py)
-  - メンバー一覧の取得: [GetMembersApi](.\src\kaonavi_api_executor\api\get_members_api.py)
-  - シート情報の取得: [GetSheetsApi](.\src\kaonavi_api_executor\api\get_sheets_api.py)
-- メンバー一覧のmember_dataをpandas.DataFrameに変換: [MembersMemberDataFlattener](.\src\kaonavi_api_executor\transformers\members_member_data_flattener.py)
-- シート情報のmember_dataをpandas.DataFrameに変換: [SheetsMemberDataFlattener](.\src\kaonavi_api_executor\transformers\sheets_member_data_flattener.py)
+- カオナビAPIv2のアクセストークンを取得: [ApiAccessTokenFetcher](./src/kaonavi_api_executor/auth/api_access_token_fetcher.py)
+- カオナビAPIv2をAPIモデルに基づいて実行: [ApiExecutor](./src/kaonavi_api_executor/api_executor.py)
+  - メンバー一覧の取得: [GetMembersApi](./src/kaonavi_api_executor/api/get_members_api.py)
+  - シート情報の取得: [GetSheetsApi](./src/kaonavi_api_executor/api/get_sheets_api.py)
+- メンバー一覧のmember_dataをpandas.DataFrameに変換: [MembersMemberDataFlattener](./src/kaonavi_api_executor/transformers/members_member_data_flattener.py)
+- シート情報のmember_dataをpandas.DataFrameに変換: [SheetsMemberDataFlattener](./src/kaonavi_api_executor/transformers/sheets_member_data_flattener.py)
 
 ## モジュール構成
 - `api_executor.py`: API実行クラス
