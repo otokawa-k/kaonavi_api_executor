@@ -8,30 +8,6 @@
             "module": "src.kaonavi_api_executor.main",
             "envFile": "${workspaceFolder}/.env",
             "console": "integratedTerminal"
-        },
-        {
-            "name": "Python: Debug Tests",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "pytest",
-            "args": [
-                "${input:targetTests}",
-                "-vv",
-            ],
-            "envFile": "${workspaceFolder}/.env.test",
-            "console": "integratedTerminal",
-        }
-    ],
-    "inputs": [
-        {
-            "id": "targetTests",
-            "type": "pickString",
-            "description": "Select test target",
-            "options": [
-                "tests/unit",
-                "tests/integration"
-            ],
-            "default": "tests/unit"
         }
     ]
 }
