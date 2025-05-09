@@ -24,23 +24,23 @@
 
 ### ソースからビルドする場合
 1. パッケージのビルド
-```bash
-uv pip install build
-uv build
-```
+    ```bash
+    uv pip install build
+    uv build
+    ```
 
 2. ビルドされたパッケージのインストール
-```bash
-uv pip install dist/kaonavi_api_executor-<version>-py3-none-any.whl
-```
+    ```bash
+    uv pip install dist/kaonavi_api_executor-<version>-py3-none-any.whl
+    ```
 
 ### GitHubリリースからインストールする場合
 1. GitHub[リリースページ](../../releases)から最新の.whlファイルをダウンロード
 
 2. ダウンロードしたパッケージのインストール
-```bash
-uv pip install kaonavi_api_executor-<version>-py3-none-any.whl
-```
+    ```bash
+    uv pip install kaonavi_api_executor-<version>-py3-none-any.whl
+    ```
 
 ## 使用例
 実行前に、以下の環境変数を事前に設定してください：
@@ -76,26 +76,26 @@ async def main() -> None:
 
 ## 開発者向け
 1. リポジトリのクローン
-```bash
-git clone <repository-url>
-cd kaonavi_api_executor
-```
+    ```bash
+    git clone <repository-url>
+    cd kaonavi_api_executor
+    ```
 
 2. 開発環境のセットアップ
-```bash
-# uvのインストール (Windows PowerShell)
-irm https://astral.sh/uv/install.ps1 | iex
-# または (Ubuntu)
-curl -sSfL https://astral.sh/uv/install.sh | sh
-```
+    ```bash
+    # uvのインストール (Windows PowerShell)
+    irm https://astral.sh/uv/install.ps1 | iex
+    # または (Ubuntu)
+    curl -sSfL https://astral.sh/uv/install.sh | sh
+    ```
 
 3. テスト実行
-```bash
-# UTを実行する場合
-uv run pytest tests/unit
-# ITを実行する場合
-uv run pytest tests/integration
-```
+    ```bash
+    # UTを実行する場合
+    uv run pytest tests/unit
+    # ITを実行する場合
+    uv run pytest tests/integration
+    ```
 
 ## License
 This project is licensed under the [MIT License](./LICENSE).
