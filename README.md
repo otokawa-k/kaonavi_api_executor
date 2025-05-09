@@ -1,4 +1,4 @@
-# カオナビAPI実行ライブラリ
+# Kaonavi API Executor
 
 ## 概要
 カオナビのAPIを実行するためのPythonライブラリです。
