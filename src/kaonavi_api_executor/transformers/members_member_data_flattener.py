@@ -32,12 +32,12 @@ class MembersMemberDataFlattener:
                 "勤続年数": member["years_of_service"],
                 "所属コード": member["department"]["code"],
                 "所属名": member["department"]["name"],
-                "所属名（階層別）": member["department"]["names"],
+                "所属名_階層別": member["department"]["names"],
                 "兼務情報": [
                     {
                         "所属コード": d["code"],
                         "所属名": d["name"],
-                        "所属名（階層別）": d["names"],
+                        "所属名_階層別": d["names"],
                     }
                     for d in member.get("sub_departments", [])
                 ],
