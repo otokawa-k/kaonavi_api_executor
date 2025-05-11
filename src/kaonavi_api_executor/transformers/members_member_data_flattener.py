@@ -1,3 +1,4 @@
+import re
 from typing import Set
 import pandas as pd
 from kaonavi_api_executor.api.get_members_api import MembersResponse
@@ -16,6 +17,12 @@ class MembersMemberDataFlattener:
                 multi_value_fields.add(name)
                 return values
             return values[0]
+
+        # nameの置換処理（英数字・日本語・_ 以外の文字を _ に変換）
+        def replace_name(name: str) -> str:
+            name = re.sub(r"[^\w]", "_", name)
+            name = re.sub(r"_+", "_", name)
+            return name.strip("_")
 
         rows = [
             {
@@ -44,7 +51,9 @@ class MembersMemberDataFlattener:
                 "顔写真更新日時": member.get("face_image"),
                 # custom_fieldsを展開（name: values）
                 **{
-                    field["name"]: extract_values(field["name"], field["values"])
+                    (name := replace_name(field["name"])): extract_values(
+                        name, field["values"]
+                    )
                     for field in member.get("custom_fields", [])
                 },
             }
