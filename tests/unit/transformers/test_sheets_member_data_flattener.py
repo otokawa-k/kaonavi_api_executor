@@ -1,5 +1,4 @@
 from typing import Any, Dict, List
-import pandas as pd
 import pytest
 from kaonavi_api_executor.api.get_sheets_api import SheetsResponse
 from kaonavi_api_executor.transformers.sheets_member_data_flattener import (

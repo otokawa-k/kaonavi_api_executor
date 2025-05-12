@@ -1,3 +1,4 @@
+from typing import Tuple
 import re
 from typing import Set
 import pandas as pd
@@ -8,7 +9,7 @@ class MembersMemberDataFlattener:
     def __init__(self, data: MembersResponse):
         self.member_data = data.member_data or []
 
-    def flatten(self) -> pd.DataFrame:
+    def flatten(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         multi_value_fields: Set[str] = set()
 
         # valuesの抽出処理
@@ -24,6 +25,7 @@ class MembersMemberDataFlattener:
             name = re.sub(r"_+", "_", name)
             return name.strip("_")
 
+        # 兼務情報以外を展開
         rows = [
             {
                 "id": member["id"],
@@ -40,14 +42,6 @@ class MembersMemberDataFlattener:
                 "所属コード": member["department"]["code"],
                 "所属名": member["department"]["name"],
                 "所属名_階層別": member["department"]["names"],
-                "兼務情報": [
-                    {
-                        "所属コード": d["code"],
-                        "所属名": d["name"],
-                        "所属名_階層別": d["names"],
-                    }
-                    for d in member.get("sub_departments", [])
-                ],
                 "顔写真更新日時": member.get("face_image"),
                 # custom_fieldsを展開（name: values）
                 **{
@@ -60,11 +54,25 @@ class MembersMemberDataFlattener:
             for member in self.member_data
         ]
 
-        df = pd.DataFrame(rows)
+        main_df = pd.DataFrame(rows)
         # multi_value_fieldsに含まれるカラムをリスト化
         for col in multi_value_fields:
-            if col in df.columns:
-                df[col] = df[col].apply(
+            if col in main_df.columns:
+                main_df[col] = main_df[col].apply(
                     lambda v: v if isinstance(v, list) or pd.isna(v) else [v]
                 )
-        return df.fillna(value=pd.NA)
+
+        # 兼務情報を展開
+        rows = [
+            {
+                "社員番号": member["code"],
+                "所属コード": sub_department["code"],
+                "所属名": sub_department["name"],
+                "所属名_階層別": sub_department["names"],
+            }
+            for member in self.member_data
+            for sub_department in member.get("sub_departments", [])
+        ]
+        sub_df = pd.DataFrame(rows)
+
+        return main_df.fillna(value=pd.NA), sub_df.fillna(value=pd.NA)
