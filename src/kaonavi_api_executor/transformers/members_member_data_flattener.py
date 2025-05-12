@@ -28,7 +28,6 @@ class MembersMemberDataFlattener:
         # 兼務情報以外を展開
         rows = [
             {
-                "id": member["id"],
                 "社員番号": member["code"],
                 "氏名": member["name"],
                 "フリガナ": member["name_kana"],
