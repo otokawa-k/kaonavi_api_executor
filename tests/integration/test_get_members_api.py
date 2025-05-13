@@ -23,6 +23,8 @@ async def test_get_members_api() -> None:
     assert isinstance(result.member_data, list), "member_data should be a list"
 
     flattener = MembersMemberDataFlattener(result)
-    df = flattener.flatten()
-    assert df is not None, "DataFrame should not be None"
-    assert not df.empty, "DataFrame should not be empty"
+    df_main, df_sub = flattener.flatten()
+    assert df_main is not None, "df_main should not be None"
+    assert df_sub is not None, "df_sub should not be None"
+    assert not df_main.empty, "df_main should not be empty"
+    assert not df_sub.empty, "df_sub should not be empty"

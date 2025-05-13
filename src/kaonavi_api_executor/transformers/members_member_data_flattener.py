@@ -10,6 +10,14 @@ class MembersMemberDataFlattener:
         self.member_data = data.member_data or []
 
     def flatten(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        メンバー情報をフラット化したDataFrameに変換する。
+
+        Returns:
+            Tuple[pd.DataFrame, pd.DataFrame]:
+                - 第1要素: メンバー情報のDataFrame
+                - 第2要素: 兼務情報のDataFrame
+        """
         multi_value_fields: Set[str] = set()
 
         # valuesの抽出処理

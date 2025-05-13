@@ -71,7 +71,7 @@ async def main() -> None:
 
     # メンバー情報の変換
     flattener = MembersMemberDataFlattener(result)
-    df = flattener.flatten()
+    df_main, df_sub = flattener.flatten() # df_main: メンバー情報のDataFrame, df_sub: 兼務情報のDataFrame
 ```
 
 ## 開発者向け

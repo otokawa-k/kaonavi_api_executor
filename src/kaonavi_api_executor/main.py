@@ -18,9 +18,10 @@ async def main() -> None:
     result = await api_executor.execute()
 
     flattener = MembersMemberDataFlattener(result)
-    df = flattener.flatten()
+    df_main, df_sub = flattener.flatten()
 
-    print(df.head())
+    print(df_main.head())
+    print(df_sub.head())
 
 
 if __name__ == "__main__":
