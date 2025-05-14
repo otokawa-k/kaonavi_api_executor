@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Any, Dict, Tuple
 import re
 from typing import Set
 import pandas as pd
@@ -20,23 +20,30 @@ class MembersMemberDataFlattener:
         """
         custom_field_has_multiple_values: Dict[str, bool] = {}
 
-        # custom_fieldsが複数値を持つかどうかを判定
-        def check_multi_values(name: str, values: list[str]) -> str | list[str]:
-            if name not in custom_field_has_multiple_values:
-                custom_field_has_multiple_values[name] = False
-            if len(values) > 1:
-                custom_field_has_multiple_values[name] = True
-            return values
-
         # nameの置換処理（英数字・日本語・_ 以外の文字を _ に変換）
         def replace_name(name: str) -> str:
             name = re.sub(r"[^\w]", "_", name)
             name = re.sub(r"_+", "_", name)
             return name.strip("_")
 
+        # custom_fieldsを展開（name: values）
+        def extract_custom_fields(member: Dict[str, Any]) -> Dict[str, list[str]]:
+            result = {}
+            for field in member.get("custom_fields", []):
+                name = replace_name(field["name"])
+                values = field["values"]
+                # custom_fieldsが複数値を持つかどうかを判定
+                if name not in custom_field_has_multiple_values:
+                    custom_field_has_multiple_values[name] = False
+                if isinstance(values, list) and len(values) > 1:
+                    custom_field_has_multiple_values[name] = True
+                result[name] = values
+            return result
+
         # 兼務情報以外を展開
-        rows = [
-            {
+        rows = []
+        for member in self.member_data:
+            base_row = {
                 "社員番号": member["code"],
                 "氏名": member["name"],
                 "フリガナ": member["name_kana"],
@@ -53,16 +60,12 @@ class MembersMemberDataFlattener:
                     f'"{x}"' for x in member["department"]["names"]
                 ),
                 "顔写真更新日時": (member.get("face_image") or {}).get("updated_at"),
-                # custom_fieldsを展開（name: values）
-                **{
-                    (name := replace_name(field["name"])): check_multi_values(
-                        name, field["values"]
-                    )
-                    for field in member.get("custom_fields", [])
-                },
             }
-            for member in self.member_data
-        ]
+
+            # custom_fieldsを統合
+            base_row.update(extract_custom_fields(member))
+
+            rows.append(base_row)
 
         main_df = pd.DataFrame(rows)
 
