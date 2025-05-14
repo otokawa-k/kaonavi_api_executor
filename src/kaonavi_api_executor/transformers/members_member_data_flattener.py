@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Dict, Tuple
 import re
 from typing import Set
 import pandas as pd
@@ -18,14 +18,15 @@ class MembersMemberDataFlattener:
                 - 第1要素: メンバー情報のDataFrame
                 - 第2要素: 兼務情報のDataFrame
         """
-        multi_value_fields: Set[str] = set()
+        custom_field_has_multiple_values: Dict[str, bool] = {}
 
-        # valuesの抽出処理
-        def extract_values(name: str, values: list[str]) -> str | list[str]:
+        # custom_fieldsが複数値を持つかどうかを判定
+        def check_multi_values(name: str, values: list[str]) -> str | list[str]:
+            if name not in custom_field_has_multiple_values:
+                custom_field_has_multiple_values[name] = False
             if len(values) > 1:
-                multi_value_fields.add(name)
-                return values
-            return values[0]
+                custom_field_has_multiple_values[name] = True
+            return values
 
         # nameの置換処理（英数字・日本語・_ 以外の文字を _ に変換）
         def replace_name(name: str) -> str:
@@ -48,11 +49,13 @@ class MembersMemberDataFlattener:
                 "勤続年数": member["years_of_service"],
                 "所属コード": member["department"]["code"],
                 "所属名": member["department"]["name"],
-                "所属名_階層別": member["department"]["names"],
-                "顔写真更新日時": member.get("face_image"),
+                "所属名_階層別": ",".join(
+                    f'"{x}"' for x in member["department"]["names"]
+                ),
+                "顔写真更新日時": (member.get("face_image") or {}).get("updated_at"),
                 # custom_fieldsを展開（name: values）
                 **{
-                    (name := replace_name(field["name"])): extract_values(
+                    (name := replace_name(field["name"])): check_multi_values(
                         name, field["values"]
                     )
                     for field in member.get("custom_fields", [])
@@ -62,11 +65,19 @@ class MembersMemberDataFlattener:
         ]
 
         main_df = pd.DataFrame(rows)
-        # multi_value_fieldsに含まれるカラムをリスト化
-        for col in multi_value_fields:
-            if col in main_df.columns:
+
+        # custom_fieldをリストから文字列に変換
+        # ただし、複数値を持つフィールドはカンマ区切りの文字列に変換
+        for col, is_multi in custom_field_has_multiple_values.items():
+            if not is_multi:
                 main_df[col] = main_df[col].apply(
-                    lambda v: v if isinstance(v, list) or pd.isna(v) else [v]
+                    lambda v: v[0] if isinstance(v, list) else v
+                )
+            else:
+                main_df[col] = main_df[col].apply(
+                    lambda v: ",".join(f'"{x}"' for x in v)
+                    if isinstance(v, list)
+                    else v
                 )
 
         # 兼務情報を展開
@@ -75,7 +86,7 @@ class MembersMemberDataFlattener:
                 "社員番号": member["code"],
                 "所属コード": sub_department["code"],
                 "所属名": sub_department["name"],
-                "所属名_階層別": sub_department["names"],
+                "所属名_階層別": ",".join(f'"{x}"' for x in sub_department["names"]),
             }
             for member in self.member_data
             for sub_department in member.get("sub_departments", [])
