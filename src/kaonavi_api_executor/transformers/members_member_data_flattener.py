@@ -1,6 +1,5 @@
 from typing import Any, Dict, Tuple
 import re
-from typing import Set
 import pandas as pd
 from kaonavi_api_executor.api.get_members_api import MembersResponse
 

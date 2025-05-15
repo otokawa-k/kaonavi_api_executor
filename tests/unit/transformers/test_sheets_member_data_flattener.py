@@ -8,6 +8,7 @@ from kaonavi_api_executor.transformers.sheets_member_data_flattener import (
 
 test_cases: List[tuple[List[Dict[str, Any]], List[Dict[str, Any]]]] = [
     (
+        # 入力: member_data
         [
             {
                 "code": "A0001",
@@ -67,6 +68,7 @@ test_cases: List[tuple[List[Dict[str, Any]], List[Dict[str, Any]]]] = [
                 ],
             },
         ],
+        # 期待値: (df)
         [
             {
                 "code": "A0001",
