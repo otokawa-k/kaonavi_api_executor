@@ -27,9 +27,11 @@ class MembersMemberDataFlattener:
             return name.strip("_")
 
         # custom_fieldsを展開（name: values）
-        def extract_custom_fields(member: Dict[str, Any]) -> Dict[str, list[str]]:
+        def extract_custom_fields(
+            custom_fields: list[Dict[str, Any]],
+        ) -> Dict[str, list[str]]:
             result = {}
-            for field in member.get("custom_fields", []):
+            for field in custom_fields:
                 name = replace_name(field["name"])
                 values = field["values"]
                 # custom_fieldsが複数値を持つかどうかを判定
@@ -41,7 +43,8 @@ class MembersMemberDataFlattener:
             return result
 
         # 兼務情報以外を展開
-        rows = []
+        main_rows = []
+        sub_rows = []
         for member in self.member_data:
             base_row = {
                 "社員番号": member["code"],
@@ -63,13 +66,25 @@ class MembersMemberDataFlattener:
             }
 
             # custom_fieldsを統合
-            base_row.update(extract_custom_fields(member))
+            base_row.update(extract_custom_fields(member.get("custom_fields", [])))
 
-            rows.append(base_row)
+            main_rows.append(base_row)
+            for sub_department in member.get("sub_departments", []):
+                sub_rows.append(
+                    {
+                        "社員番号": member["code"],
+                        "所属コード": sub_department["code"],
+                        "所属名": sub_department["name"],
+                        "所属名_階層別": ",".join(
+                            f'"{x}"' for x in sub_department["names"]
+                        ),
+                    }
+                )
 
-        main_df = pd.DataFrame(rows)
+        main_df = pd.DataFrame(main_rows)
+        sub_df = pd.DataFrame(sub_rows)
 
-        # custom_fieldをリストから文字列に変換
+        # main_dfのcustom_fieldをリストから文字列に変換
         # ただし、複数値を持つフィールドはカンマ区切りの文字列に変換
         for col, is_multi in custom_field_has_multiple_values.items():
             if not is_multi:
@@ -82,18 +97,5 @@ class MembersMemberDataFlattener:
                     if isinstance(v, list)
                     else v
                 )
-
-        # 兼務情報を展開
-        rows = [
-            {
-                "社員番号": member["code"],
-                "所属コード": sub_department["code"],
-                "所属名": sub_department["name"],
-                "所属名_階層別": ",".join(f'"{x}"' for x in sub_department["names"]),
-            }
-            for member in self.member_data
-            for sub_department in member.get("sub_departments", [])
-        ]
-        sub_df = pd.DataFrame(rows)
 
         return main_df.fillna(value=pd.NA), sub_df.fillna(value=pd.NA)
