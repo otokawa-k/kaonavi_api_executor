@@ -42,35 +42,37 @@ class MembersMemberDataFlattener:
                 result[name] = values
             return result
 
-        # 兼務情報以外を展開
         main_rows = []
         sub_rows = []
         for member in self.member_data:
-            base_row = {
-                "社員番号": member["code"],
-                "氏名": member["name"],
-                "フリガナ": member["name_kana"],
-                "メールアドレス": member["mail"],
-                "入社日": member["entered_date"],
-                "退職日": member["retired_date"],
-                "性別": member["gender"],
-                "生年月日": member["birthday"],
-                "年齢": member["age"],
-                "勤続年数": member["years_of_service"],
-                "所属コード": member["department"]["code"],
-                "所属名": member["department"]["name"],
-                "所属名_階層別": ",".join(
-                    f'"{x}"' for x in member["department"]["names"]
-                ),
-                "顔写真更新日時": (member.get("face_image") or {}).get("updated_at"),
-            }
+            main_rows.append(
+                {
+                    "社員番号": member["code"],
+                    "氏名": member["name"],
+                    "フリガナ": member["name_kana"],
+                    "メールアドレス": member["mail"],
+                    "入社日": member["entered_date"],
+                    "退職日": member["retired_date"],
+                    "性別": member["gender"],
+                    "生年月日": member["birthday"],
+                    "年齢": member["age"],
+                    "勤続年数": member["years_of_service"],
+                    "所属コード": member["department"]["code"],
+                    "所属名": member["department"]["name"],
+                    "所属名_階層別": ",".join(
+                        f'"{x}"' for x in member["department"]["names"]
+                    ),
+                    "顔写真更新日時": (member.get("face_image") or {}).get(
+                        "updated_at"
+                    ),
+                    # custom_fieldsを統合
+                    **extract_custom_fields(member.get("custom_fields", [])),
+                }
+            )
 
-            # custom_fieldsを統合
-            base_row.update(extract_custom_fields(member.get("custom_fields", [])))
-
-            main_rows.append(base_row)
-            for sub_department in member.get("sub_departments", []):
-                sub_rows.append(
+            # 兼務情報を展開
+            sub_rows.extend(
+                [
                     {
                         "社員番号": member["code"],
                         "所属コード": sub_department["code"],
@@ -79,7 +81,9 @@ class MembersMemberDataFlattener:
                             f'"{x}"' for x in sub_department["names"]
                         ),
                     }
-                )
+                    for sub_department in member.get("sub_departments", [])
+                ]
+            )
 
         main_df = pd.DataFrame(main_rows)
         sub_df = pd.DataFrame(sub_rows)
