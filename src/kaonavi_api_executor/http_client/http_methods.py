@@ -7,7 +7,7 @@ import os
 import time
 
 
-def build_request_args(
+def _build_request_args(
     url: str,
     data: Optional[Any] = None,
     params: Optional[Dict[str, Any]] = None,
@@ -26,6 +26,32 @@ def build_request_args(
     return args
 
 
+def _make_cache_key(key_dict: dict[str, Any]) -> str:
+    return hashlib.sha256(
+        json.dumps(key_dict, sort_keys=True, default=str).encode()
+    ).hexdigest()
+
+
+def _get_cache(
+    cache: dict[str, tuple[float, Response]], key: str
+) -> Optional[Response]:
+    ttl_seconds = int(os.environ.get("KAONAVI_API_CACHE_TTL_MINUTES", "10")) * 60
+    now = time.time()
+    cached = cache.get(key)
+    if cached is not None:
+        cached_time, cached_response = cached
+        if now - cached_time < ttl_seconds:
+            return cached_response
+        del cache[key]
+    return None
+
+
+def _set_cache(
+    cache: dict[str, tuple[float, Response]], key: str, response: Response
+) -> None:
+    cache[key] = (time.time(), response)
+
+
 class Post(HttpClient):
     def __init__(self) -> None:
         super().__init__()
@@ -39,28 +65,19 @@ class Post(HttpClient):
         headers: Optional[Dict[str, str]] = None,
         auth: Optional[Auth] = None,
     ) -> Response:
-        # キャッシュキー生成
-        key_dict = {
+        key_dict: dict[str, Any] = {
             "url": url,
             "data": data,
             "headers": headers,
             "auth": str(auth) if auth is not None else None,
         }
-        key = hashlib.sha256(
-            json.dumps(key_dict, sort_keys=True, default=str).encode()
-        ).hexdigest()
-        ttl_minutes = int(os.environ.get("KAONAVI_API_CACHE_TTL_MINUTES", "10"))
-        ttl_seconds = ttl_minutes * 60
-        now = time.time()
-        cached = self._cache.get(key)
-        if cached is not None:
-            cached_time, cached_response = cached
-            if now - cached_time < ttl_seconds:
-                return cached_response
-            del self._cache[key]
+        key = _make_cache_key(key_dict)
+        cached_response = _get_cache(self._cache, key)
+        if cached_response is not None:
+            return cached_response
         async with AsyncClient() as client:
             response = await client.post(
-                **build_request_args(
+                **_build_request_args(
                     url=url,
                     data=data,
                     params=params,
@@ -68,7 +85,7 @@ class Post(HttpClient):
                     auth=auth,
                 )
             )
-            self._cache[key] = (now, response)
+            _set_cache(self._cache, key, response)
             return response
 
 
@@ -85,33 +102,24 @@ class Get(HttpClient):
         headers: Optional[Dict[str, str]] = None,
         auth: Optional[Auth] = None,
     ) -> Response:
-        # キャッシュキー生成
-        key_dict = {
+        key_dict: dict[str, Any] = {
             "url": url,
             "params": params,
             "headers": headers,
             "auth": str(auth) if auth is not None else None,
         }
-        key = hashlib.sha256(
-            json.dumps(key_dict, sort_keys=True, default=str).encode()
-        ).hexdigest()
-        ttl_minutes = int(os.environ.get("KAONAVI_API_CACHE_TTL_MINUTES", "10"))
-        ttl_seconds = ttl_minutes * 60
-        now = time.time()
-        cached = self._cache.get(key)
-        if cached is not None:
-            cached_time, cached_response = cached
-            if now - cached_time < ttl_seconds:
-                return cached_response
-            del self._cache[key]
+        key = _make_cache_key(key_dict)
+        cached_response = _get_cache(self._cache, key)
+        if cached_response is not None:
+            return cached_response
         async with AsyncClient() as client:
             response = await client.get(
-                **build_request_args(
+                **_build_request_args(
                     url=url,
                     params=params,
                     headers=headers,
                     auth=auth,
                 )
             )
-            self._cache[key] = (now, response)
+            _set_cache(self._cache, key, response)
             return response
