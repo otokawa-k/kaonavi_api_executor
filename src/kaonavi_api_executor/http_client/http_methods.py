@@ -3,6 +3,8 @@ from typing import Any, Dict, Optional
 from httpx import AsyncClient, Response, Auth
 import hashlib
 import json
+import os
+import time
 
 
 def build_request_args(
@@ -27,7 +29,7 @@ def build_request_args(
 class Post(HttpClient):
     def __init__(self) -> None:
         super().__init__()
-        self._cache: dict[str, Response] = {}
+        self._cache: dict[str, tuple[float, Response]] = {}
 
     async def send(
         self,
@@ -47,8 +49,15 @@ class Post(HttpClient):
         key = hashlib.sha256(
             json.dumps(key_dict, sort_keys=True, default=str).encode()
         ).hexdigest()
-        if key in self._cache:
-            return self._cache[key]
+        ttl_minutes = int(os.environ.get("KAONAVI_API_CACHE_TTL_MINUTES", "10"))
+        ttl_seconds = ttl_minutes * 60
+        now = time.time()
+        cached = self._cache.get(key)
+        if cached is not None:
+            cached_time, cached_response = cached
+            if now - cached_time < ttl_seconds:
+                return cached_response
+            del self._cache[key]
         async with AsyncClient() as client:
             response = await client.post(
                 **build_request_args(
@@ -59,14 +68,14 @@ class Post(HttpClient):
                     auth=auth,
                 )
             )
-            self._cache[key] = response
+            self._cache[key] = (now, response)
             return response
 
 
 class Get(HttpClient):
     def __init__(self) -> None:
         super().__init__()
-        self._cache: dict[str, Response] = {}
+        self._cache: dict[str, tuple[float, Response]] = {}
 
     async def send(
         self,
@@ -86,8 +95,15 @@ class Get(HttpClient):
         key = hashlib.sha256(
             json.dumps(key_dict, sort_keys=True, default=str).encode()
         ).hexdigest()
-        if key in self._cache:
-            return self._cache[key]
+        ttl_minutes = int(os.environ.get("KAONAVI_API_CACHE_TTL_MINUTES", "10"))
+        ttl_seconds = ttl_minutes * 60
+        now = time.time()
+        cached = self._cache.get(key)
+        if cached is not None:
+            cached_time, cached_response = cached
+            if now - cached_time < ttl_seconds:
+                return cached_response
+            del self._cache[key]
         async with AsyncClient() as client:
             response = await client.get(
                 **build_request_args(
@@ -97,5 +113,5 @@ class Get(HttpClient):
                     auth=auth,
                 )
             )
-            self._cache[key] = response
+            self._cache[key] = (now, response)
             return response
