@@ -1,8 +1,20 @@
-from typing import Generator, Tuple
+from typing import Generator, Tuple, Type, Dict, Any
 import pytest
 from unittest.mock import patch, AsyncMock, MagicMock
 import os
 from kaonavi_api_executor.http_client.http_methods import Post, Get
+from kaonavi_api_executor.http_client.http_client import HttpClient
+
+
+@pytest.fixture
+def test_data() -> Dict[str, Any]:
+    return {
+        "url": "https://mocked-url.com",
+        "headers": {"Content-Type": "application/json"},
+        "auth": None,
+        "params": {"query": "value"},
+        "data": {"key": "value"},
+    }
 
 
 @pytest.fixture
@@ -25,304 +37,150 @@ def mock_async_client() -> Generator[Tuple[MagicMock, AsyncMock], None, None]:
 
 
 @pytest.mark.asyncio
-async def test_post(mock_async_client: Tuple[MagicMock, AsyncMock]) -> None:
+@pytest.mark.parametrize(
+    "client_cls, method, req_args",
+    [
+        (Post, "post", {"data": "data"}),
+        (Get, "get", {"params": "params"}),
+    ],
+)
+async def test_send(
+    client_cls: Type[HttpClient],
+    method: str,
+    req_args: Dict[str, str],
+    mock_async_client: Tuple[MagicMock, AsyncMock],
+    test_data: Dict[str, Any],
+) -> None:
     mock_client, mock_response = mock_async_client
+    client = client_cls()
+    args = {
+        "url": test_data["url"],
+        "headers": test_data["headers"],
+        "auth": test_data["auth"],
+    }
+    if "data" in req_args:
+        args["data"] = test_data["data"]
+    if "params" in req_args:
+        args["params"] = test_data["params"]
 
-    post_client = Post()
-
-    url = "https://mocked-url.com"
-    data = {"key": "value"}
-    headers = {"Content-Type": "application/json"}
-    auth = None
-
-    response = await post_client.send(url=url, data=data, headers=headers, auth=auth)
-
-    mock_client.__aenter__.return_value.post.assert_called_once_with(
-        url=url,
-        data=data,
-        headers=headers,
+    response = await client.send(**args)
+    getattr(mock_client.__aenter__.return_value, method).assert_called_once_with(
+        url=test_data["url"],
+        **({req_args["data"]: test_data["data"]} if "data" in req_args else {}),
+        **({req_args["params"]: test_data["params"]} if "params" in req_args else {}),
+        headers=test_data["headers"],
     )
     assert response == mock_response
 
 
 @pytest.mark.asyncio
-async def test_get(mock_async_client: Tuple[MagicMock, AsyncMock]) -> None:
-    mock_client, mock_response = mock_async_client
-
-    get_client = Get()
-
-    url = "https://mocked-url.com"
-    params = {"query": "value"}
-    headers = {"Content-Type": "application/json"}
-    auth = None
-
-    response = await get_client.send(url=url, params=params, headers=headers, auth=auth)
-
-    mock_client.__aenter__.return_value.get.assert_called_once_with(
-        url=url,
-        params=params,
-        headers=headers,
-    )
-    assert response == mock_response
-
-
-@pytest.mark.asyncio
-async def test_get_caches_response(
+@pytest.mark.parametrize(
+    "client_cls, method, req_args",
+    [
+        (Get, "get", {"params": "params"}),
+        (Post, "post", {"data": "data"}),
+    ],
+)
+async def test_cache_response(
+    client_cls: Type[HttpClient],
+    method: str,
+    req_args: Dict[str, str],
     mock_async_client: Tuple[MagicMock, AsyncMock],
+    test_data: Dict[str, Any],
 ) -> None:
-    """
-    同一リクエスト内容の場合、2回目以降はAPIを実行せずキャッシュを返却することを確認するテスト
-    """
-    mock_client, mock_response = mock_async_client
-    get_client = Get()
+    mock_client, _ = mock_async_client
+    client = client_cls()
+    args = {
+        "url": test_data["url"],
+        "headers": test_data["headers"],
+        "auth": test_data["auth"],
+    }
+    if "data" in req_args:
+        args["data"] = test_data["data"]
+    if "params" in req_args:
+        args["params"] = test_data["params"]
 
-    url = "https://mocked-url.com"
-    params = {"query": "value"}
-    headers = {"Content-Type": "application/json"}
-    auth = None
-
-    # 1回目: API呼び出し
-    response1 = await get_client.send(
-        url=url, params=params, headers=headers, auth=auth
-    )
-    # 2回目: キャッシュ返却（API呼び出しなしを期待）
-    response2 = await get_client.send(
-        url=url, params=params, headers=headers, auth=auth
-    )
-
-    # 1回目は呼ばれる
-    assert mock_client.__aenter__.return_value.get.call_count == 1
-    # 2回目は呼ばれない（キャッシュ返却）
+    response1 = await client.send(**args)
+    response2 = await client.send(**args)
+    assert getattr(mock_client.__aenter__.return_value, method).call_count == 1
     assert response1 == response2
 
 
 @pytest.mark.asyncio
-async def test_post_caches_response(
+@pytest.mark.parametrize(
+    "client_cls, method, req_args",
+    [
+        (Get, "get", {"params": "params"}),
+        (Post, "post", {"data": "data"}),
+    ],
+)
+async def test_cache_expires_after_default_ttl(
+    client_cls: Type[HttpClient],
+    method: str,
+    req_args: Dict[str, str],
     mock_async_client: Tuple[MagicMock, AsyncMock],
+    test_data: Dict[str, Any],
 ) -> None:
-    """
-    同一リクエスト内容の場合、2回目以降はAPIを実行せずキャッシュを返却することを確認するテスト
-    """
     mock_client, mock_response = mock_async_client
-    post_client = Post()
+    client = client_cls()
+    args = {
+        "url": test_data["url"],
+        "headers": test_data["headers"],
+        "auth": test_data["auth"],
+    }
+    if "data" in req_args:
+        args["data"] = test_data["data"]
+    if "params" in req_args:
+        args["params"] = test_data["params"]
 
-    url = "https://mocked-url.com"
-    data = {"key": "value"}
-    headers = {"Content-Type": "application/json"}
-    auth = None
-
-    # 1回目: API呼び出し
-    response1 = await post_client.send(url=url, data=data, headers=headers, auth=auth)
-    # 2回目: キャッシュ返却（API呼び出しなしを期待）
-    response2 = await post_client.send(url=url, data=data, headers=headers, auth=auth)
-
-    # 1回目は呼ばれる
-    assert mock_client.__aenter__.return_value.post.call_count == 1
-    # 2回目は呼ばれない（キャッシュ返却）
-    assert response1 == response2
+    with patch.dict(os.environ, {}, clear=True):
+        with patch("kaonavi_api_executor.http_client.http_methods.time") as mock_time:
+            mock_time.time.return_value = 1000
+            response1 = await client.send(**args)
+            mock_time.time.return_value = 1000 + 599
+            response2 = await client.send(**args)
+            assert response1 == response2
+            mock_time.time.return_value = 1000 + 601
+            response3 = await client.send(**args)
+            assert getattr(mock_client.__aenter__.return_value, method).call_count == 2
+            assert response3 == mock_response
 
 
 @pytest.mark.asyncio
-async def test_get_cache_expires_after_default_ttl(
+@pytest.mark.parametrize(
+    "client_cls, method, req_args",
+    [
+        (Get, "get", {"params": "params"}),
+        (Post, "post", {"data": "data"}),
+    ],
+)
+async def test_cache_ttl_can_be_set_by_env(
+    client_cls: Type[HttpClient],
+    method: str,
+    req_args: Dict[str, str],
     mock_async_client: Tuple[MagicMock, AsyncMock],
+    test_data: Dict[str, Any],
 ) -> None:
     mock_client, mock_response = mock_async_client
-    get_client = Get()
-
-    url = "https://mocked-url.com"
-    params = {"query": "value"}
-    headers = {"Content-Type": "application/json"}
-    auth = None
-
-    with patch("kaonavi_api_executor.http_client.http_methods.time") as mock_time:
-        # 開始時刻
-        mock_time.time.return_value = 1000
-        response1 = await get_client.send(
-            url=url, params=params, headers=headers, auth=auth
-        )
-        # 10分以内（+599秒）はキャッシュ
-        mock_time.time.return_value = 1000 + 599
-        response2 = await get_client.send(
-            url=url, params=params, headers=headers, auth=auth
-        )
-        assert response1 == response2
-        # 10分後（+601秒）はキャッシュ切れ
-        mock_time.time.return_value = 1000 + 601
-        response3 = await get_client.send(
-            url=url, params=params, headers=headers, auth=auth
-        )
-        # 2回目のAPI呼び出しが発生する
-        assert mock_client.__aenter__.return_value.get.call_count == 2
-        assert response3 == mock_response
-
-
-@pytest.mark.asyncio
-async def test_get_cache_ttl_can_be_set_by_env(
-    mock_async_client: Tuple[MagicMock, AsyncMock],
-) -> None:
-    mock_client, mock_response = mock_async_client
-    get_client = Get()
-
-    url = "https://mocked-url.com"
-    params = {"query": "value"}
-    headers = {"Content-Type": "application/json"}
-    auth = None
+    client = client_cls()
+    args = {
+        "url": test_data["url"],
+        "headers": test_data["headers"],
+        "auth": test_data["auth"],
+    }
+    if "data" in req_args:
+        args["data"] = test_data["data"]
+    if "params" in req_args:
+        args["params"] = test_data["params"]
 
     with patch.dict(os.environ, {"KAONAVI_API_CACHE_TTL_MINUTES": "2"}):
         with patch("kaonavi_api_executor.http_client.http_methods.time") as mock_time:
             mock_time.time.return_value = 1000
-            response1 = await get_client.send(
-                url=url, params=params, headers=headers, auth=auth
-            )
-            # 2分以内（+119秒）はキャッシュ
+            response1 = await client.send(**args)
             mock_time.time.return_value = 1000 + 119
-            response2 = await get_client.send(
-                url=url, params=params, headers=headers, auth=auth
-            )
+            response2 = await client.send(**args)
             assert response1 == response2
-            # 2分経過後（+121秒）はキャッシュ切れ
             mock_time.time.return_value = 1000 + 121
-            response3 = await get_client.send(
-                url=url, params=params, headers=headers, auth=auth
-            )
-            assert mock_client.__aenter__.return_value.get.call_count == 2
-            assert response3 == mock_response
-
-
-@pytest.mark.asyncio
-async def test_get_cache_ttl_env_default_10min(
-    mock_async_client: Tuple[MagicMock, AsyncMock],
-) -> None:
-    mock_client, mock_response = mock_async_client
-    get_client = Get()
-
-    url = "https://mocked-url.com"
-    params = {"query": "value"}
-    headers = {"Content-Type": "application/json"}
-    auth = None
-
-    with patch.dict(os.environ, {}, clear=True):
-        with patch("kaonavi_api_executor.http_client.http_methods.time") as mock_time:
-            # 開始時刻
-            mock_time.time.return_value = 1000
-            response1 = await get_client.send(
-                url=url, params=params, headers=headers, auth=auth
-            )
-            # 10分以内（+599秒）はキャッシュ
-            mock_time.time.return_value = 1000 + 599
-            response2 = await get_client.send(
-                url=url, params=params, headers=headers, auth=auth
-            )
-            assert response1 == response2
-            # 10分後（+601秒）はキャッシュ切れ
-            mock_time.time.return_value = 1000 + 601
-            response3 = await get_client.send(
-                url=url, params=params, headers=headers, auth=auth
-            )
-            # 2回目のAPI呼び出しが発生する
-            assert mock_client.__aenter__.return_value.get.call_count == 2
-            assert response3 == mock_response
-
-
-@pytest.mark.asyncio
-async def test_post_cache_expires_after_default_ttl(
-    mock_async_client: Tuple[MagicMock, AsyncMock],
-) -> None:
-    mock_client, mock_response = mock_async_client
-    post_client = Post()
-
-    url = "https://mocked-url.com"
-    data = {"key": "value"}
-    headers = {"Content-Type": "application/json"}
-    auth = None
-
-    with patch("kaonavi_api_executor.http_client.http_methods.time") as mock_time:
-        # 開始時刻
-        mock_time.time.return_value = 1000
-        response1 = await post_client.send(
-            url=url, data=data, headers=headers, auth=auth
-        )
-        # 10分以内（+599秒）はキャッシュ
-        mock_time.time.return_value = 1000 + 599
-        response2 = await post_client.send(
-            url=url, data=data, headers=headers, auth=auth
-        )
-        assert response1 == response2
-        # 10分後（+601秒）はキャッシュ切れ
-        mock_time.time.return_value = 1000 + 601
-        response3 = await post_client.send(
-            url=url, data=data, headers=headers, auth=auth
-        )
-        # 2回目のAPI呼び出しが発生する
-        assert mock_client.__aenter__.return_value.post.call_count == 2
-        assert response3 == mock_response
-
-
-@pytest.mark.asyncio
-async def test_post_cache_ttl_can_be_set_by_env(
-    mock_async_client: Tuple[MagicMock, AsyncMock],
-) -> None:
-    mock_client, mock_response = mock_async_client
-    post_client = Post()
-
-    url = "https://mocked-url.com"
-    data = {"key": "value"}
-    headers = {"Content-Type": "application/json"}
-    auth = None
-
-    with patch.dict(os.environ, {"KAONAVI_API_CACHE_TTL_MINUTES": "2"}):
-        with patch("kaonavi_api_executor.http_client.http_methods.time") as mock_time:
-            # 開始時刻
-            mock_time.time.return_value = 1000
-            response1 = await post_client.send(
-                url=url, data=data, headers=headers, auth=auth
-            )
-            # 2分以内（+119秒）はキャッシュ
-            mock_time.time.return_value = 1000 + 119
-            response2 = await post_client.send(
-                url=url, data=data, headers=headers, auth=auth
-            )
-            assert response1 == response2
-            # 2分経過後（+121秒）はキャッシュ切れ
-            mock_time.time.return_value = 1000 + 121
-            response3 = await post_client.send(
-                url=url, data=data, headers=headers, auth=auth
-            )
-            # 2回目のAPI呼び出しが発生する
-            assert mock_client.__aenter__.return_value.post.call_count == 2
-            assert response3 == mock_response
-
-
-@pytest.mark.asyncio
-async def test_post_cache_ttl_env_default_10min(
-    mock_async_client: Tuple[MagicMock, AsyncMock],
-) -> None:
-    mock_client, mock_response = mock_async_client
-    post_client = Post()
-
-    url = "https://mocked-url.com"
-    data = {"key": "value"}
-    headers = {"Content-Type": "application/json"}
-    auth = None
-
-    with patch.dict(os.environ, {}, clear=True):
-        with patch("kaonavi_api_executor.http_client.http_methods.time") as mock_time:
-            # 開始時刻
-            mock_time.time.return_value = 1000
-            response1 = await post_client.send(
-                url=url, data=data, headers=headers, auth=auth
-            )
-            # 10分以内（+599秒）はキャッシュ
-            mock_time.time.return_value = 1000 + 599
-            response2 = await post_client.send(
-                url=url, data=data, headers=headers, auth=auth
-            )
-            assert response1 == response2
-            # 10分後（+601秒）はキャッシュ切れ
-            mock_time.time.return_value = 1000 + 601
-            response3 = await post_client.send(
-                url=url, data=data, headers=headers, auth=auth
-            )
-            # 2回目のAPI呼び出しが発生する
-            assert mock_client.__aenter__.return_value.post.call_count == 2
+            response3 = await client.send(**args)
+            assert getattr(mock_client.__aenter__.return_value, method).call_count == 2
             assert response3 == mock_response
