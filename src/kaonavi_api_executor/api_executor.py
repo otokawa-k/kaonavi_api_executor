@@ -2,11 +2,13 @@ from typing import Generic
 
 from .auth.access_token import AccessToken
 from .api.api_model import ApiModel
-from .types.typevars import TResponse
+from .types.typevars import TRequest, TResponse
 
 
-class ApiExecutor(Generic[TResponse]):
-    def __init__(self, access_token: AccessToken, api: ApiModel[TResponse]) -> None:
+class ApiExecutor(Generic[TRequest, TResponse]):
+    def __init__(
+        self, access_token: AccessToken, api: ApiModel[TRequest, TResponse]
+    ) -> None:
         self.access_token = access_token
         self.api = api
 

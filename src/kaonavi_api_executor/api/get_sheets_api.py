@@ -6,6 +6,10 @@ from ..http_client.http_client import HttpClient
 from ..http_client.http_methods import Get
 
 
+class EmptyRequest(BaseModel):
+    pass
+
+
 class SheetsResponse(BaseModel):
     id: int
     name: str
@@ -14,7 +18,7 @@ class SheetsResponse(BaseModel):
     member_data: list[Dict[str, Any]]
 
 
-class GetSheetsApi(ApiModel[SheetsResponse]):
+class GetSheetsApi(ApiModel[EmptyRequest, SheetsResponse]):
     def __init__(self, sheet_id: int) -> None:
         super().__init__()
 

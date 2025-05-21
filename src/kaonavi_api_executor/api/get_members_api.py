@@ -6,12 +6,16 @@ from ..http_client.http_client import HttpClient
 from ..http_client.http_methods import Get
 
 
+class EmptyRequest(BaseModel):
+    pass
+
+
 class MembersResponse(BaseModel):
     updated_at: str
     member_data: list[Dict[str, Any]]
 
 
-class GetMembersApi(ApiModel[MembersResponse]):
+class GetMembersApi(ApiModel[EmptyRequest, MembersResponse]):
     def __init__(self) -> None:
         super().__init__()
 

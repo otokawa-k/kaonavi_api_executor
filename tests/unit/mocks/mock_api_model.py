@@ -5,18 +5,20 @@ from kaonavi_api_executor.http_client.http_client import HttpClient
 from .mock_http_method import MockResponse, MockHttpMethod
 
 
+class EmptyRequest(BaseModel):
+    pass
+
+
 class MockApiResponse(BaseModel):
     id: str
     name: str
 
 
-class MockApiModel(ApiModel[MockApiResponse]):
+class MockApiModel(ApiModel[EmptyRequest, MockApiResponse]):
     def __init__(self) -> None:
+        super().__init__()
+
         self.url = "https://example.com"
-        self.params = None
-        self.headers = {}
-        self.auth = None
-        self.data = None
 
     @property
     def http_method(self) -> HttpClient:
