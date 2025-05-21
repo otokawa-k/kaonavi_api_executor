@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 from httpx import Auth, Response
 import pytest
 from tests.unit.mocks.mock_http_method import MockHttpMethod, MockResponse
-from kaonavi_api_executor.auth.token import Token
+from kaonavi_api_executor.auth.access_token import AccessToken
 
 
 class SwitchableMockHttpMethod(MockHttpMethod):
@@ -51,17 +51,17 @@ async def test_get_returns_token_and_refreshes_on_expiry() -> None:
         ),
     ]
     http_method = SwitchableMockHttpMethod(responses)
-    token = Token(http_method=http_method)
+    access_token = AccessToken(http_method=http_method)
 
     # 初回取得
-    assert await token.get() == "token_1"
+    assert await access_token.get() == "token_1"
 
     # 有効期限内は再取得しない
-    assert await token.get() == "token_1"
+    assert await access_token.get() == "token_1"
 
     # 有効期限切れ後は再取得される（有効期限を強制的に過去に）
-    token._expires_at = int(time.time()) - 1
-    assert await token.get() == "token_2"
+    access_token._expires_at = int(time.time()) - 1
+    assert await access_token.get() == "token_2"
 
 
 @pytest.mark.asyncio
@@ -75,5 +75,5 @@ async def test_token_is_refetched_if_never_fetched() -> None:
         },
     )
     http_method = MockHttpMethod(mock_response=response)
-    token = Token(http_method=http_method)
-    assert await token.get() == "token_1"
+    access_token = AccessToken(http_method=http_method)
+    assert await access_token.get() == "token_1"

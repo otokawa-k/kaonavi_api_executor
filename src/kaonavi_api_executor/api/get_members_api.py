@@ -12,18 +12,14 @@ class MembersResponse(BaseModel):
 
 
 class GetMembersApi(ApiModel[MembersResponse]):
-    def __init__(self, token: str) -> None:
+    def __init__(self) -> None:
         super().__init__()
-
-        if token is None:
-            raise ValueError("Token must be provided")
 
         url = os.getenv("KAONAVI_API_URL", "https://api.kaonavi.jp/api/v2.0")
         self.url = f"{url}/members"
-        self.headers = {"Content-Type": "application/json", "Kaonavi-Token": token}
 
     @property
-    def method(self) -> HttpClient:
+    def http_method(self) -> HttpClient:
         return Get()
 
     def parse_response(self, raw_json: Dict[str, Any]) -> MembersResponse:

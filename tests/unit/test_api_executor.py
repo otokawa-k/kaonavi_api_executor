@@ -5,10 +5,10 @@ from .mocks.mock_api_model import MockApiModel
 
 @pytest.mark.asyncio
 async def test_api_executor() -> None:
-    mock_api = MockApiModel()
-    api_executor = ApiExecutor(mock_api)
+    api_executor = ApiExecutor()
 
-    result = await api_executor.execute()
+    mock_api = MockApiModel()
+    result = await api_executor.execute(mock_api)
 
     assert result.id == "12345"
     assert result.name == "テスト名称"

@@ -14,12 +14,12 @@ class MockApiModel(ApiModel[MockApiResponse]):
     def __init__(self) -> None:
         self.url = "https://example.com"
         self.params = None
-        self.headers = {"Authorization": "mocked-token"}
+        self.headers = {}
         self.auth = None
         self.data = None
 
     @property
-    def method(self) -> HttpClient:
+    def http_method(self) -> HttpClient:
         return MockHttpMethod(
             MockResponse(
                 status_code=200, json_data={"id": "12345", "name": "テスト名称"}

@@ -11,12 +11,12 @@ class ApiModel(ABC, Generic[TResponse]):
         self.url: Optional[str] = None
         self.data: Optional[Any] = None
         self.params: Optional[Dict[str, Any]] = None
-        self.headers: Optional[Dict[str, str]] = None
+        self.headers: Dict[str, str] = {}
         self.auth: Optional[Auth] = None
 
     @property
     @abstractmethod
-    def method(self) -> HttpClient:
+    def http_method(self) -> HttpClient:
         pass
 
     @abstractmethod

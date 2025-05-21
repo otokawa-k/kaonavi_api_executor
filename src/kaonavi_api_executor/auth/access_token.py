@@ -5,7 +5,7 @@ from httpx import BasicAuth
 from ..http_client.http_client import HttpClient
 
 
-class Token:
+class AccessToken:
     def __init__(self, http_method: HttpClient) -> None:
         self._http_method = http_method
         self.consumer_key = os.getenv("KAONAVI_CONSUMER_KEY")
