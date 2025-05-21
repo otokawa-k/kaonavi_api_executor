@@ -51,7 +51,7 @@
 | KAONAVI_CONSUMER_SECRET | カオナビ公開APIv2のConsumer Secret |
 
 ```python
-from kaonavi_api_executor.auth.api_access_token_fetcher import ApiAccessTokenFetcher
+from kaonavi_api_executor.auth.access_token import AccessToken
 from kaonavi_api_executor.api_executor import ApiExecutor
 from kaonavi_api_executor.api.get_members_api import GetMembersApi
 from kaonavi_api_executor.http_client.http_methods import Post
@@ -60,14 +60,11 @@ from kaonavi_api_executor.transformers.members_member_data_flattener import (
 )
 
 async def main() -> None:
-    # アクセストークンの取得
-    fetcher = ApiAccessTokenFetcher(Post())
-    token = await fetcher.fetch_access_token()
-
     # メンバー情報の取得
-    api = GetMembersApi(token=token)
-    api_executor = ApiExecutor(api)
-    result = await api_executor.execute()
+    access_token = AccessToken(http_method=Post())
+    api = GetMembersApi()
+    members_api_executor = ApiExecutor(access_token=access_token, api=api)
+    result = await members_api_executor.execute()
 
     # メンバー情報の変換
     flattener = MembersMemberDataFlattener(result)
