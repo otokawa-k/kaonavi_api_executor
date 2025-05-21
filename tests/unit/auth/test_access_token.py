@@ -1,38 +1,17 @@
 import time
-from typing import Any, Dict, List, Optional
-from httpx import Auth, Response
 import pytest
-from tests.unit.mocks.mock_http_method import MockHttpMethod, MockResponse
+from tests.unit.mocks.mock_http_method import (
+    MockHttpMethod,
+    MockResponse,
+    SwitchableMockHttpMethod,
+)
 from kaonavi_api_executor.auth.access_token import AccessToken
-
-
-class SwitchableMockHttpMethod(MockHttpMethod):
-    responses: List[MockResponse]
-    call_count: int
-
-    def __init__(self, responses: list[MockResponse]) -> None:
-        super().__init__(mock_response=responses[0])
-        self.responses = responses
-        self.call_count = 0
-
-    async def send(
-        self,
-        url: str,
-        data: Optional[Any] = None,
-        params: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, str]] = None,
-        auth: Optional[Auth] = None,
-    ) -> Response:
-        idx = min(self.call_count, len(self.responses) - 1)
-        self._mock_response = self.responses[idx]
-        self.call_count += 1
-        return self._mock_response._to_response()
 
 
 @pytest.mark.asyncio
 async def test_get_returns_token_and_refreshes_on_expiry() -> None:
     # 1回目と2回目で異なるトークンを返すようにする
-    responses = [
+    mock_responses = [
         MockResponse(
             status_code=200,
             json_data={
@@ -50,7 +29,7 @@ async def test_get_returns_token_and_refreshes_on_expiry() -> None:
             },
         ),
     ]
-    http_method = SwitchableMockHttpMethod(responses)
+    http_method = SwitchableMockHttpMethod(mock_responses)
     access_token = AccessToken(http_method=http_method)
 
     # 初回取得
@@ -66,14 +45,14 @@ async def test_get_returns_token_and_refreshes_on_expiry() -> None:
 
 @pytest.mark.asyncio
 async def test_token_is_refetched_if_never_fetched() -> None:
-    response = MockResponse(
+    mock_response = MockResponse(
         status_code=200,
         json_data={
             "access_token": "token_1",
             "token_type": "Bearer",
-            "expire_in": 2,
+            "expire_in": 3600,
         },
     )
-    http_method = MockHttpMethod(mock_response=response)
+    http_method = MockHttpMethod(mock_response=mock_response)
     access_token = AccessToken(http_method=http_method)
     assert await access_token.get() == "token_1"

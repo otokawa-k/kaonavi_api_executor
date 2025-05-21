@@ -1,31 +1,31 @@
 from typing import Generic
 
-from .http_client.http_methods import Post
 from .auth.access_token import AccessToken
 from .api.api_model import ApiModel
 from .types.typevars import TResponse
 
 
-class ApiExecutor:
-    def __init__(self) -> None:
-        self.access_token = AccessToken(http_method=Post())
+class ApiExecutor(Generic[TResponse]):
+    def __init__(self, access_token: AccessToken, api: ApiModel[TResponse]) -> None:
+        self.access_token = access_token
+        self.api = api
 
-    async def execute(self, api: ApiModel[TResponse]) -> TResponse:
-        if not api.url:
+    async def execute(self) -> TResponse:
+        if not self.api.url:
             raise ValueError("API URL is not set.")
 
         headers = {
-            **api.headers,
+            **self.api.headers,
             "Content-Type": "application/json",
             "Kaonavi-Token": await self.access_token.get(),
         }
 
-        response = await api.http_method.send(
-            url=api.url,
-            params=api.params,
+        response = await self.api.http_method.send(
+            url=self.api.url,
+            params=self.api.params,
             headers=headers,
-            auth=api.auth,
-            data=api.data,
+            auth=self.api.auth,
+            data=self.api.data,
         )
 
         if response.status_code != 200:
@@ -33,4 +33,4 @@ class ApiExecutor:
                 f"API request failed with status code {response.status_code}"
             )
 
-        return api.parse_response(response.json())
+        return self.api.parse_response(response.json())

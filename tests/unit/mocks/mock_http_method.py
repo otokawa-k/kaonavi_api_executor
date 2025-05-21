@@ -20,7 +20,7 @@ class MockResponse:
             raise httpx.HTTPStatusError(
                 f"HTTP Error {self.status_code}",
                 request=Request(method="GET", url="https://mocked-url.com"),
-                response=self._to_response(),
+                response=self.to_response(),
             )
 
     def json(self) -> Dict[str, Any]:
@@ -29,7 +29,7 @@ class MockResponse:
     def text(self) -> str:
         return self._text
 
-    def _to_response(self) -> Response:
+    def to_response(self) -> Response:
         return Response(
             status_code=self.status_code,
             json=self._json_data,
@@ -38,11 +38,8 @@ class MockResponse:
 
 
 class MockHttpMethod(HttpClient):
-    def __init__(self, mock_response: Optional[MockResponse] = None):
-        self._mock_response = mock_response or MockResponse(
-            status_code=200,
-            json_data={"access_token": "mocked-token"},
-        )
+    def __init__(self, mock_response: MockResponse):
+        self._mock_response = mock_response
 
     async def send(
         self,
@@ -52,4 +49,23 @@ class MockHttpMethod(HttpClient):
         headers: Optional[Dict[str, str]] = None,
         auth: Optional[Auth] = None,
     ) -> Response:
-        return self._mock_response._to_response()
+        return self._mock_response.to_response()
+
+
+class SwitchableMockHttpMethod(MockHttpMethod):
+    def __init__(self, mock_responses: list[MockResponse]) -> None:
+        super().__init__(mock_response=mock_responses[0])
+        self._mock_responses = mock_responses
+        self._call_count = 0
+
+    async def send(
+        self,
+        url: str,
+        data: Optional[Any] = None,
+        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, str]] = None,
+        auth: Optional[Auth] = None,
+    ) -> Response:
+        idx = min(self._call_count, len(self._mock_responses) - 1)
+        self._call_count += 1
+        return self._mock_responses[idx].to_response()
