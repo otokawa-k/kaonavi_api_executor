@@ -5,7 +5,7 @@
 カオナビAPIv2のアクセストークンを取得し、APIモデルに基づいてAPIを実行します。
 
 ## 主な機能
-- カオナビAPIv2のアクセストークンを取得: [ApiAccessTokenFetcher](./src/kaonavi_api_executor/auth/api_access_token_fetcher.py)
+- カオナビAPIv2のアクセストークンを取得: [AccessToken](./src/kaonavi_api_executor/auth/access_token.py)
 - カオナビAPIv2をAPIモデルに基づいて実行: [ApiExecutor](./src/kaonavi_api_executor/api_executor.py)
   - メンバー一覧の取得: [GetMembersApi](./src/kaonavi_api_executor/api/get_members_api.py)
   - シート情報の取得: [GetSheetsApi](./src/kaonavi_api_executor/api/get_sheets_api.py)
