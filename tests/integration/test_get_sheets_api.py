@@ -15,8 +15,9 @@ async def test_get_sheets_api() -> None:
     sheet_id = os.getenv("SHEET_ID")
     if sheet_id is None:
         raise Exception("SHEET_ID environment variable is not set.")
-    api = GetSheetsApi(sheet_id=int(sheet_id))
+    api = GetSheetsApi()
     sheets_api_executor = ApiExecutor(access_token=access_token, api=api)
+    api.set_sheet_id(int(sheet_id))
     result = await sheets_api_executor.execute()
 
     assert result.id == int(sheet_id), f"id should be {sheet_id}"
