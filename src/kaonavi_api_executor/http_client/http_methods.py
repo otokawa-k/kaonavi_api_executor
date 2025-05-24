@@ -64,6 +64,7 @@ class Post(HttpClient):
         params: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
         auth: Optional[Auth] = None,
+        no_cache: bool = False,
     ) -> Response:
         key_dict: dict[str, Any] = {
             "url": url,
@@ -72,7 +73,9 @@ class Post(HttpClient):
             "auth": str(auth) if auth is not None else None,
         }
         key = _make_cache_key(key_dict)
-        cached_response = _get_cache(self._cache, key)
+        cached_response = None
+        if not no_cache:
+            cached_response = _get_cache(self._cache, key)
         if cached_response is not None:
             return cached_response
         async with AsyncClient() as client:
@@ -101,6 +104,7 @@ class Get(HttpClient):
         params: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
         auth: Optional[Auth] = None,
+        no_cache: bool = False,
     ) -> Response:
         key_dict: dict[str, Any] = {
             "url": url,
@@ -109,7 +113,9 @@ class Get(HttpClient):
             "auth": str(auth) if auth is not None else None,
         }
         key = _make_cache_key(key_dict)
-        cached_response = _get_cache(self._cache, key)
+        cached_response = None
+        if not no_cache:
+            cached_response = _get_cache(self._cache, key)
         if cached_response is not None:
             return cached_response
         async with AsyncClient() as client:

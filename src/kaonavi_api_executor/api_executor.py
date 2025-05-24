@@ -12,7 +12,7 @@ class ApiExecutor(Generic[TRequest, TResponse]):
         self.access_token = access_token
         self.api = api
 
-    async def execute(self) -> TResponse:
+    async def execute(self, no_cache: bool = False) -> TResponse:
         if not self.api.url:
             raise ValueError("API URL is not set.")
 
@@ -28,6 +28,7 @@ class ApiExecutor(Generic[TRequest, TResponse]):
             headers=headers,
             auth=self.api.auth,
             data=self.api.data,
+            no_cache=no_cache,
         )
 
         if response.status_code != 200:

@@ -184,3 +184,37 @@ async def test_cache_ttl_can_be_set_by_env(
             response3 = await client.send(**args)
             assert getattr(mock_client.__aenter__.return_value, method).call_count == 2
             assert response3 == mock_response
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "client_cls, method, req_args",
+    [
+        (Get, "get", {"params": "params"}),
+        (Post, "post", {"data": "data"}),
+    ],
+)
+async def test_no_cache(
+    client_cls: Type[HttpClient],
+    method: str,
+    req_args: Dict[str, str],
+    mock_async_client: Tuple[MagicMock, AsyncMock],
+    test_data: Dict[str, Any],
+) -> None:
+    mock_client, _ = mock_async_client
+    client = client_cls()
+    args = {
+        "url": test_data["url"],
+        "headers": test_data["headers"],
+        "auth": test_data["auth"],
+        "no_cache": True,
+    }
+    if "data" in req_args:
+        args["data"] = test_data["data"]
+    if "params" in req_args:
+        args["params"] = test_data["params"]
+
+    response1 = await client.send(**args)
+    response2 = await client.send(**args)
+    assert getattr(mock_client.__aenter__.return_value, method).call_count == 2
+    assert response1 == response2

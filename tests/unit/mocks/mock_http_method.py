@@ -48,6 +48,7 @@ class MockHttpMethod(HttpClient):
         params: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
         auth: Optional[Auth] = None,
+        no_cache: bool = False,
     ) -> Response:
         return self._mock_response.to_response()
 
@@ -65,6 +66,7 @@ class SwitchableMockHttpMethod(MockHttpMethod):
         params: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
         auth: Optional[Auth] = None,
+        no_cache: bool = False,
     ) -> Response:
         idx = min(self._call_count, len(self._mock_responses) - 1)
         self._call_count += 1

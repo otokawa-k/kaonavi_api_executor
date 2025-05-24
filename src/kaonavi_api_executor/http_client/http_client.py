@@ -12,5 +12,6 @@ class HttpClient(ABC):
         params: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
         auth: Optional[Auth] = None,
+        no_cache: bool = False,
     ) -> Response:
         pass
