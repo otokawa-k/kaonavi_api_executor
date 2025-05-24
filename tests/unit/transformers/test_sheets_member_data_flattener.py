@@ -71,7 +71,7 @@ test_cases: List[tuple[List[Dict[str, Any]], List[Dict[str, Any]]]] = [
         # 期待値: (df)
         [
             {
-                "code": "A0001",
+                "社員番号": "A0001",
                 "row_index": 0,
                 "住所": "東京都渋谷区1-1-1",
                 "電話番号_一覧": '"03-1234-5678"',
@@ -79,7 +79,7 @@ test_cases: List[tuple[List[Dict[str, Any]], List[Dict[str, Any]]]] = [
                 "変換_できるか_テスト": None,
             },
             {
-                "code": "A0001",
+                "社員番号": "A0001",
                 "row_index": 1,
                 "住所": "大阪府大阪市2-2-2",
                 "電話番号_一覧": None,
@@ -87,7 +87,7 @@ test_cases: List[tuple[List[Dict[str, Any]], List[Dict[str, Any]]]] = [
                 "変換_できるか_テスト": None,
             },
             {
-                "code": "A0002",
+                "社員番号": "A0002",
                 "row_index": 0,
                 "住所": "神戸市中央区3-3-3",
                 "電話番号_一覧": '"078-1234-5678","090-1234-5678"',

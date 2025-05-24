@@ -35,7 +35,7 @@ class SheetsMemberDataFlattener:
 
         rows = [
             {
-                "code": member["code"],
+                "社員番号": member["code"],
                 "row_index": i,
                 **extract_custom_fields(record.get("custom_fields", [])),
             }
