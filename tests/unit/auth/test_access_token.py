@@ -16,11 +16,8 @@ async def test_no_cache_parameter_is_passed_correctly() -> None:
     )
     http_method = MockHttpMethod([mock_response])
     access_token = AccessToken(http_method=http_method)
-
-    # トークンを取得
     await access_token.get()
 
-    # no_cacheがTrueで呼び出されたことを確認
     assert http_method.last_call_args.no_cache is True
 
 

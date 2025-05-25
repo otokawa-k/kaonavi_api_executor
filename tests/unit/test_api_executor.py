@@ -34,10 +34,10 @@ async def test_api_executor_no_cache() -> None:
             "expire_in": 3600,
         },
     )
-    access_token = AccessToken(http_method=MockHttpMethod([mock_response]))
+    http_method = MockHttpMethod([mock_response])
+    access_token = AccessToken(http_method=http_method)
     mock_api = MockApiModel()
     api_executor = ApiExecutor(access_token=access_token, api=mock_api)
-    result = await api_executor.execute(no_cache=True)
+    await api_executor.execute(no_cache=True)
 
-    assert result.id == "12345"
-    assert result.name == "テスト名称"
+    assert http_method.last_call_args.no_cache is True
