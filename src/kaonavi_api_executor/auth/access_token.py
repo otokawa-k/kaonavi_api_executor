@@ -34,6 +34,7 @@ class AccessToken:
             data="grant_type=client_credentials",
             headers={"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
             auth=BasicAuth(self.consumer_key, self.consumer_secret),
+            no_cache=True,
         )
         if response.status_code != 200:
             raise Exception(

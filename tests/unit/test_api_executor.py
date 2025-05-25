@@ -15,7 +15,7 @@ async def test_api_executor() -> None:
             "expire_in": 3600,
         },
     )
-    access_token = AccessToken(http_method=MockHttpMethod(mock_response=mock_response))
+    access_token = AccessToken(http_method=MockHttpMethod([mock_response]))
     mock_api = MockApiModel()
     api_executor = ApiExecutor(access_token=access_token, api=mock_api)
     result = await api_executor.execute()
@@ -34,7 +34,7 @@ async def test_api_executor_no_cache() -> None:
             "expire_in": 3600,
         },
     )
-    access_token = AccessToken(http_method=MockHttpMethod(mock_response=mock_response))
+    access_token = AccessToken(http_method=MockHttpMethod([mock_response]))
     mock_api = MockApiModel()
     api_executor = ApiExecutor(access_token=access_token, api=mock_api)
     result = await api_executor.execute(no_cache=True)

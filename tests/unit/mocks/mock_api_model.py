@@ -22,11 +22,11 @@ class MockApiModel(ApiModel[EmptyRequest, MockApiResponse]):
 
     @property
     def http_method(self) -> HttpClient:
-        return MockHttpMethod(
-            MockResponse(
-                status_code=200, json_data={"id": "12345", "name": "テスト名称"}
-            )
+        mock_response = MockResponse(
+            status_code=200,
+            json_data={"id": "12345", "name": "テスト名称"},
         )
+        return MockHttpMethod([mock_response])
 
     def parse_response(self, raw_json: Dict[str, Any]) -> MockApiResponse:
         return MockApiResponse.model_validate(raw_json)

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from kaonavi_api_executor.http_client.http_client import HttpClient
 from typing import Any, Dict, Optional
 from httpx import Response, Auth, Request
@@ -37,27 +38,21 @@ class MockResponse:
         )
 
 
+@dataclass
+class CallArgs:
+    url: str = ""
+    data: Optional[Any] = None
+    params: Optional[Dict[str, Any]] = None
+    headers: Optional[Dict[str, str]] = None
+    auth: Optional[Auth] = None
+    no_cache: bool = False
+
+
 class MockHttpMethod(HttpClient):
-    def __init__(self, mock_response: MockResponse):
-        self._mock_response = mock_response
-
-    async def send(
-        self,
-        url: str,
-        data: Optional[Any] = None,
-        params: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, str]] = None,
-        auth: Optional[Auth] = None,
-        no_cache: bool = False,
-    ) -> Response:
-        return self._mock_response.to_response()
-
-
-class SwitchableMockHttpMethod(MockHttpMethod):
     def __init__(self, mock_responses: list[MockResponse]) -> None:
-        super().__init__(mock_response=mock_responses[0])
         self._mock_responses = mock_responses
         self._call_count = 0
+        self.last_call_args: CallArgs = CallArgs()
 
     async def send(
         self,
@@ -68,6 +63,15 @@ class SwitchableMockHttpMethod(MockHttpMethod):
         auth: Optional[Auth] = None,
         no_cache: bool = False,
     ) -> Response:
+        self.last_call_args = CallArgs(
+            url=url,
+            data=data,
+            params=params,
+            headers=headers,
+            auth=auth,
+            no_cache=no_cache,
+        )
+
         idx = min(self._call_count, len(self._mock_responses) - 1)
         self._call_count += 1
         return self._mock_responses[idx].to_response()
